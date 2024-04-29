@@ -34,14 +34,13 @@ public class WeatherServiceImpl implements WeatherService {
     @Override
     public WeatherDto getWeatherByCityName(String city) {
         Optional<Weather> optionalWeather = weatherRepository.findFirstByRequestedCityNameOrderByUpdatedTimeDesc(city);
-        if (!optionalWeather.isPresent()) {
-            return WeatherDto.convert(getWeatherFromWeatherStack(city));
-        }
 
-        if (optionalWeather.get().getUpdatedTime().isBefore(LocalDateTime.now().minusSeconds(30))){
-            return WeatherDto.convert(getWeatherFromWeatherStack(city));
-        }
-        return WeatherDto.convert(optionalWeather.get());
+        return optionalWeather.map(weather -> {
+            if (weather.getUpdatedTime().isBefore(LocalDateTime.now().minusSeconds(30))) {
+                return WeatherDto.convert(getWeatherFromWeatherStack(city));
+            }
+            return WeatherDto.convert(weather);
+        }).orElseGet(() -> WeatherDto.convert(getWeatherFromWeatherStack(city)));
     }
 
     private Weather getWeatherFromWeatherStack(String city) {
