@@ -38,8 +38,10 @@ public class WeatherServiceImpl implements WeatherService {
             return WeatherDto.convert(getWeatherFromWeatherStack(city));
         }
 
+        if (optionalWeather.get().getUpdatedTime().isBefore(LocalDateTime.now().minusSeconds(30))){
+            return WeatherDto.convert(getWeatherFromWeatherStack(city));
+        }
         return WeatherDto.convert(optionalWeather.get());
-
     }
 
     private Weather getWeatherFromWeatherStack(String city) {
