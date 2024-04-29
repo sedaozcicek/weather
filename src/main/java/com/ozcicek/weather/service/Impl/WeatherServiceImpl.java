@@ -2,6 +2,7 @@ package com.ozcicek.weather.service.Impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ozcicek.weather.constance.Constants;
 import com.ozcicek.weather.dto.WeatherDto;
 import com.ozcicek.weather.dto.WeatherResponse;
 import com.ozcicek.weather.model.Weather;
@@ -17,9 +18,6 @@ import java.util.Optional;
 
 @Component
 public class WeatherServiceImpl implements WeatherService {
-
-
-    private static final String API_URL = "http://api.weatherstack.com/current?access_key=69ffb46b0c27349b2175101ffe96e33f&query=";
     private final WeatherRepository weatherRepository;
 
     private final RestTemplate restTemplate;
@@ -44,14 +42,18 @@ public class WeatherServiceImpl implements WeatherService {
     }
 
     private Weather getWeatherFromWeatherStack(String city) {
-        // responseEntity bize json şeklinde dönecek bu sayede
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(API_URL + city, String.class);
+
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(getWeatherStackUrl(city), String.class);
         try {
             WeatherResponse weatherResponse = objectMapper.readValue(responseEntity.getBody(), WeatherResponse.class);
             return saveWeather(city,weatherResponse);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getWeatherStackUrl(String city){
+        return Constants.API_URL + Constants.ACCESS_KEY_PARAM + Constants.API_KEY + Constants.QUERY_KEY_PARAM + city ;
     }
 
     public Weather saveWeather(String city, WeatherResponse weatherResponse) {
@@ -67,5 +69,7 @@ public class WeatherServiceImpl implements WeatherService {
 
         return weatherRepository.save(weather);
     }
+
+
 
 }
