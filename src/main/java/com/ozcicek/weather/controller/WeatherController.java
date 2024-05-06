@@ -3,6 +3,7 @@ package com.ozcicek.weather.controller;
 import com.ozcicek.weather.controller.validator.CityNameConstraint;
 import com.ozcicek.weather.dto.WeatherDto;
 import com.ozcicek.weather.service.WeatherService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +23,7 @@ public class WeatherController {
     }
 
     @RequestMapping("/{city}")
+    @RateLimiter(name = "basic")
     public ResponseEntity<WeatherDto> getWeather(@PathVariable("city") @CityNameConstraint @NotBlank String city){
         return ResponseEntity.ok(weatherService.getWeatherByCityName(city));
     }
